@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog.jsx";
-import { Button } from "./ui/button.jsx";
-import { Input } from "./ui/input.jsx";
-import { Label } from "./ui/label.jsx";
-import { Textarea } from "./ui/textarea.jsx";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select.jsx";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { toast } from "sonner@2.0.3";
 import { Plus, Trash2 } from "lucide-react";
 

@@ -1,9 +1,9 @@
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { Star, DollarSign, Clock, CheckCircle, FileText } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs.jsx";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 export function MyQuotes({ setCurrentView, setSelectedServiceId }) {
   const { state } = useApp();

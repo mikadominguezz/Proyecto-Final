@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { ArrowLeft, Star, Clock, DollarSign, CheckCircle, TrendingDown } from "lucide-react";
 import { toast } from "sonner@2.0.3";
 import {
@@ -14,7 +14,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog.jsx";
+} from "./ui/alert-dialog";
 
 export function QuoteComparator({ serviceId, onBack }) {
   const { state, dispatch } = useApp();

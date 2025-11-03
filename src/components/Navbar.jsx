@@ -1,7 +1,7 @@
 import { useApp } from "../context/AppContext.jsx";
-import { Button } from "./ui/button.jsx";
+import { Button } from "./ui/button";
 import { LogOut, User, Home, Package, FileText, ShoppingCart } from "lucide-react";
-import { Badge } from "./ui/badge.jsx";
+import { Badge } from "./ui/badge";
 
 export function Navbar({ currentView, setCurrentView }) {
   const { state, dispatch } = useApp();

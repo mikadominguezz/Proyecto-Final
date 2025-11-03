@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
-import { Input } from "./ui/input.jsx";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { MapPin, Calendar, Package, FileText } from "lucide-react";
 
 export function ServicesList({ setCurrentView, setSelectedServiceId }) {

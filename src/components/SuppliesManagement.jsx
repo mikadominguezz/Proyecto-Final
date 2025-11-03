@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
-import { Input } from "./ui/input.jsx";
-import { Label } from "./ui/label.jsx";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { toast } from "sonner@2.0.3";
 import { Plus, Package, Edit, Trash2 } from "lucide-react";
 

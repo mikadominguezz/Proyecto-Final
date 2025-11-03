@@ -1,7 +1,7 @@
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { FileText, ShoppingCart, Package, TrendingUp, Clock, CheckCircle } from "lucide-react";
 
 export function Dashboard({ setCurrentView, setSelectedServiceId }) {

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Button } from "./ui/button.jsx";
-import { Input } from "./ui/input.jsx";
-import { Label } from "./ui/label.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { toast } from "sonner@2.0.3";
 
 export function Login() {

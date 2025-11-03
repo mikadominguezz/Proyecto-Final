@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext.jsx";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
-import { Badge } from "./ui/badge.jsx";
-import { Button } from "./ui/button.jsx";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { ArrowLeft, MapPin, Calendar, Package, DollarSign, Clock, Star } from "lucide-react";
 import { CreateQuote } from "./CreateQuote.jsx";
 import { CreateSupplyOffer } from "./CreateSupplyOffer.jsx";
