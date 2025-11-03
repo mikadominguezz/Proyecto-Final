@@ -1,0 +1,211 @@
+import { useState } from "react";
+import { useApp } from "../context/AppContext.jsx";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card.jsx";
+import { Badge } from "./ui/badge.jsx";
+import { Button } from "./ui/button.jsx";
+import { Input } from "./ui/input.jsx";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select.jsx";
+import { MapPin, Calendar, Package, FileText } from "lucide-react";
+
+export function ServicesList({ setCurrentView, setSelectedServiceId }) {
+  const { state } = useApp();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterCity, setFilterCity] = useState("all");
+
+  const getCategoryLabel = (cat) => {
+    const labels = {
+      jardineria: "Jardinería",
+      piscinas: "Piscinas",
+      limpieza: "Limpieza",
+      otros: "Otros"
+    };
+    return labels[cat] || cat;
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "PUBLICADO": return "bg-blue-500";
+      case "EN_EVALUACION": return "bg-yellow-500";
+      case "ASIGNADO": return "bg-green-500";
+      case "COMPLETADO": return "bg-gray-500";
+      default: return "bg-gray-500";
+    }
+  };
+
+  const cities = Array.from(new Set(state.services.map(s => s.ciudad)));
+
+  const filteredServices = state.services.filter(service => {
+    const matchesSearch = service.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         service.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = filterCategory === "all" || service.categoria === filterCategory;
+    const matchesStatus = filterStatus === "all" || service.estado === filterStatus;
+    const matchesCity = filterCity === "all" || service.ciudad === filterCity;
+
+    return matchesSearch && matchesCategory && matchesStatus && matchesCity;
+  });
+
+  const handleServiceClick = (serviceId) => {
+    setSelectedServiceId(serviceId);
+    setCurrentView("service-detail");
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2>Servicios Disponibles</h2>
+          <p className="text-muted-foreground">Explora y gestiona servicios</p>
+        </div>
+        {state.currentUser?.rol === "SOLICITANTE" && (
+          <Button onClick={() => setCurrentView("create-service")}>
+            <FileText className="w-4 h-4 mr-2" />
+            Publicar Servicio
+          </Button>
+        )}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filtros</CardTitle>
+          <CardDescription>Busca y filtra servicios según tus necesidades</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="md:col-span-2">
+              <Input
+                placeholder="Buscar por título o descripción..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Categoría" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las categorías</SelectItem>
+                <SelectItem value="jardineria">Jardinería</SelectItem>
+                <SelectItem value="piscinas">Piscinas</SelectItem>
+                <SelectItem value="limpieza">Limpieza</SelectItem>
+                <SelectItem value="otros">Otros</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="PUBLICADO">Publicado</SelectItem>
+                <SelectItem value="EN_EVALUACION">En Evaluación</SelectItem>
+                <SelectItem value="ASIGNADO">Asignado</SelectItem>
+                <SelectItem value="COMPLETADO">Completado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {cities.length > 0 && (
+            <div className="mt-4">
+              <Select value={filterCity} onValueChange={setFilterCity}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Ciudad" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas las ciudades</SelectItem>
+                  {cities.map(city => (
+                    <SelectItem key={city} value={city}>{city}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 gap-4">
+        {filteredServices.length === 0 ? (
+          <Card>
+            <CardContent className="text-center py-12">
+              <FileText className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+              <h3 className="mb-2">No se encontraron servicios</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm || filterCategory !== "all" || filterStatus !== "all" 
+                  ? "Intenta ajustar los filtros" 
+                  : "No hay servicios disponibles en este momento"}
+              </p>
+              {state.currentUser?.rol === "SOLICITANTE" && (
+                <Button onClick={() => setCurrentView("create-service")}>
+                  Publicar Primer Servicio
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredServices.map(service => {
+            const quotesCount = state.quotes.filter(q => q.serviceId === service.id).length;
+            const offersCount = state.supplyOffers.filter(o => o.serviceId === service.id).length;
+            const solicitante = state.users.find(u => u.id === service.solicitanteId);
+
+            return (
+              <Card 
+                key={service.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => handleServiceClick(service.id)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3>{service.titulo}</h3>
+                        <Badge className={getStatusColor(service.estado)}>
+                          {service.estado.replace("_", " ")}
+                        </Badge>
+                        <Badge variant="outline">{getCategoryLabel(service.categoria)}</Badge>
+                      </div>
+                      <p className="text-muted-foreground mb-3">{service.descripcion}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="w-4 h-4 text-muted-foreground" />
+                      <span>{service.direccion}, {service.ciudad}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span>{new Date(service.fechaPreferida).toLocaleDateString('es-ES')}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Package className="w-4 h-4 text-muted-foreground" />
+                      <span>{service.insumosRequeridos.length} insumos requeridos</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>Publicado por: <strong>{solicitante?.nombre}</strong></span>
+                      <span>•</span>
+                      <span>{quotesCount} cotizaciones</span>
+                      <span>•</span>
+                      <span>{offersCount} ofertas de insumos</span>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Ver Detalles
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
+      </div>
+
+      {filteredServices.length > 0 && (
+        <div className="text-center text-sm text-muted-foreground">
+          Mostrando {filteredServices.length} de {state.services.length} servicios
+        </div>
+      )}
+    </div>
+  );
+}
