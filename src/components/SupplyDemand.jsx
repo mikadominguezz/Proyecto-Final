@@ -11,12 +11,36 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { toast } from "sonner@2.0.3";
 import { Package, ShoppingCart, TrendingUp, AlertCircle, CheckCircle2 } from "lucide-react";
 
+const CIUDADES_URUGUAY = [
+  { value: "montevideo", label: "Montevideo" },
+  { value: "salto", label: "Salto" },
+  { value: "paysandu", label: "Paysandú" },
+  { value: "las-piedras", label: "Las Piedras" },
+  { value: "rivera", label: "Rivera" },
+  { value: "maldonado", label: "Maldonado" },
+  { value: "tacuarembo", label: "Tacuarembó" },
+  { value: "melo", label: "Melo" },
+  { value: "mercedes", label: "Mercedes" },
+  { value: "artigas", label: "Artigas" },
+  { value: "minas", label: "Minas" },
+  { value: "san-jose", label: "San José de Mayo" },
+  { value: "durazno", label: "Durazno" },
+  { value: "florida", label: "Florida" },
+  { value: "canelones", label: "Canelones" },
+  { value: "colonia", label: "Colonia del Sacramento" },
+  { value: "punta-del-este", label: "Punta del Este" },
+  { value: "rocha", label: "Rocha" },
+  { value: "treinta-y-tres", label: "Treinta y Tres" }
+];
+
 export function SupplyDemand({ setCurrentView }) {
   const { state, dispatch } = useApp();
   const [selectedService, setSelectedService] = useState(null);
   const [showOfferDialog, setShowOfferDialog] = useState(false);
   const [selectedSupplies, setSelectedSupplies] = useState([]);
   const [offerNotes, setOfferNotes] = useState("");
+  const [customPrice, setCustomPrice] = useState("");
+  const [useCustomPrice, setUseCustomPrice] = useState(false);
 
   // Servicios publicados con insumos requeridos
   const servicesWithDemand = state.services.filter(
@@ -63,6 +87,11 @@ export function SupplyDemand({ setCurrentView }) {
     return labels[cat] || cat;
   };
 
+  const getCityLabel = (cityValue) => {
+    const ciudad = CIUDADES_URUGUAY.find(c => c.value === cityValue);
+    return ciudad ? ciudad.label : cityValue;
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "PUBLICADO": return "bg-blue-500";
@@ -92,6 +121,8 @@ export function SupplyDemand({ setCurrentView }) {
     
     setSelectedSupplies(preSelected);
     setOfferNotes("");
+    setCustomPrice("");
+    setUseCustomPrice(false);
     setShowOfferDialog(true);
   };
 
@@ -148,6 +179,17 @@ export function SupplyDemand({ setCurrentView }) {
       return;
     }
 
+    // Validar precio personalizado si está activado
+    let finalPrice = calculateTotal();
+    if (useCustomPrice) {
+      const customPriceNum = parseFloat(customPrice);
+      if (!customPriceNum || customPriceNum <= 0) {
+        toast.error("El precio del pack debe ser mayor a 0");
+        return;
+      }
+      finalPrice = customPriceNum;
+    }
+
     const newOffer = {
       id: `so${Date.now()}`,
       serviceId: selectedService.id,
@@ -159,17 +201,22 @@ export function SupplyDemand({ setCurrentView }) {
         esEquivalente: item.esEquivalente,
         notasEquivalencia: item.notasEquivalencia,
       })),
-      precioTotal: calculateTotal(),
+      precioTotal: finalPrice,
+      precioOriginal: calculateTotal(),
+      esPack: useCustomPrice,
+      descuentoPack: useCustomPrice ? Math.round(((calculateTotal() - finalPrice) / calculateTotal()) * 100) : 0,
       notas: offerNotes,
       createdAt: new Date().toISOString(),
     };
 
     dispatch({ type: "ADD_SUPPLY_OFFER", payload: newOffer });
-    toast.success("Oferta de insumos enviada exitosamente");
+    toast.success(useCustomPrice ? "Pack de insumos enviado exitosamente" : "Oferta de insumos enviada exitosamente");
     setShowOfferDialog(false);
     setSelectedService(null);
     setSelectedSupplies([]);
     setOfferNotes("");
+    setCustomPrice("");
+    setUseCustomPrice(false);
   };
 
   const hasOfferedToService = (serviceId) => {
@@ -296,7 +343,7 @@ export function SupplyDemand({ setCurrentView }) {
                           {service.estado.replace("_", " ")}
                         </Badge>
                         <Badge variant="outline">{getCategoryLabel(service.categoria)}</Badge>
-                        <Badge variant="outline">{service.ciudad}</Badge>
+                        <Badge variant="outline">{getCityLabel(service.ciudad)}</Badge>
                       </div>
                     </div>
                   </div>
@@ -356,7 +403,15 @@ export function SupplyDemand({ setCurrentView }) {
                 <Card key={offer.id}>
                   <CardContent className="p-6">
                     <div className="mb-4">
-                      <h4 className="mb-2">{service.titulo}</h4>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4>{service.titulo}</h4>
+                        {offer.esPack && (
+                          <Badge className="bg-green-500">
+                            <Package className="w-3 h-3 mr-1" />
+                            Pack
+                          </Badge>
+                        )}
+                      </div>
                       <Badge className={getStatusColor(service.estado)}>
                         {service.estado.replace("_", " ")}
                       </Badge>
@@ -397,9 +452,30 @@ export function SupplyDemand({ setCurrentView }) {
                       })}
                     </div>
 
-                    <div className="pt-4 border-t">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold">Precio Total:</span>
+                    <div className="pt-4 border-t space-y-2">
+                      {offer.esPack && offer.precioOriginal && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Package className="w-4 h-4 text-green-600" />
+                            <span className="font-semibold text-green-900">Oferta Pack Especial</span>
+                          </div>
+                          <div className="space-y-1 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Precio individual total:</span>
+                              <span className="line-through">${offer.precioOriginal.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between text-green-600 font-medium">
+                              <span>Descuento del pack:</span>
+                              <span>-${(offer.precioOriginal - offer.precioTotal).toLocaleString()} ({offer.descuentoPack}%)</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">
+                          {offer.esPack ? "Precio del Pack:" : "Precio Total:"}
+                        </span>
                         <span className="text-xl font-bold text-primary">
                           ${offer.precioTotal.toLocaleString()}
                         </span>
@@ -522,11 +598,94 @@ export function SupplyDemand({ setCurrentView }) {
               />
             </div>
 
+            {/* Precio del Pack */}
+            <div className="border-t pt-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="useCustomPrice"
+                  checked={useCustomPrice}
+                  onChange={(e) => setUseCustomPrice(e.target.checked)}
+                  className="w-4 h-4 rounded border-gray-300"
+                />
+                <Label htmlFor="useCustomPrice" className="cursor-pointer">
+                  Ofrecer como Pack con Precio Especial
+                </Label>
+              </div>
+
+              {useCustomPrice && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Package className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-medium text-green-900 mb-1">Pack de Insumos</p>
+                      <p className="text-sm text-green-700">
+                        Ofrece un precio especial por el paquete completo. Puedes aplicar un descuento para hacer tu oferta más atractiva.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-sm text-muted-foreground">Precio Individual Total</Label>
+                      <div className="text-lg font-semibold">
+                        ${calculateTotal().toLocaleString()}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="customPrice">Precio del Pack ($) *</Label>
+                      <Input
+                        id="customPrice"
+                        type="number"
+                        min="1"
+                        step="0.01"
+                        value={customPrice}
+                        onChange={(e) => setCustomPrice(e.target.value)}
+                        placeholder="Ej: 6500"
+                      />
+                    </div>
+                  </div>
+
+                  {customPrice && parseFloat(customPrice) > 0 && (
+                    <div className="bg-white rounded p-3 space-y-2">
+                      {parseFloat(customPrice) < calculateTotal() ? (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-green-600 font-medium">Descuento:</span>
+                            <span className="text-green-600 font-medium">
+                              ${(calculateTotal() - parseFloat(customPrice)).toLocaleString()} 
+                              ({Math.round(((calculateTotal() - parseFloat(customPrice)) / calculateTotal()) * 100)}%)
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="font-semibold">Ahorro para el cliente:</span>
+                            <span className="font-semibold text-green-600">
+                              ${(calculateTotal() - parseFloat(customPrice)).toLocaleString()}
+                            </span>
+                          </div>
+                        </>
+                      ) : parseFloat(customPrice) > calculateTotal() ? (
+                        <div className="text-sm text-yellow-600">
+                          ⚠️ El precio del pack es mayor al precio individual total
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          Sin descuento
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="bg-primary/10 rounded-lg p-4">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold">Precio Total:</span>
+                <span className="text-lg font-semibold">
+                  {useCustomPrice ? "Precio del Pack:" : "Precio Total:"}
+                </span>
                 <span className="text-2xl font-bold text-primary">
-                  ${calculateTotal().toLocaleString()}
+                  ${(useCustomPrice && customPrice ? parseFloat(customPrice) : calculateTotal()).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -537,7 +696,7 @@ export function SupplyDemand({ setCurrentView }) {
               Cancelar
             </Button>
             <Button onClick={handleSubmitOffer}>
-              Enviar Oferta
+              {useCustomPrice ? "Enviar Pack" : "Enviar Oferta"}
             </Button>
           </DialogFooter>
         </DialogContent>

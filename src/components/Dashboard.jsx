@@ -4,6 +4,28 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { FileText, ShoppingCart, Package, TrendingUp, Clock, CheckCircle } from "lucide-react";
 
+const CIUDADES_URUGUAY = [
+  { value: "montevideo", label: "Montevideo" },
+  { value: "salto", label: "Salto" },
+  { value: "paysandu", label: "Paysandú" },
+  { value: "las-piedras", label: "Las Piedras" },
+  { value: "rivera", label: "Rivera" },
+  { value: "maldonado", label: "Maldonado" },
+  { value: "tacuarembo", label: "Tacuarembó" },
+  { value: "melo", label: "Melo" },
+  { value: "mercedes", label: "Mercedes" },
+  { value: "artigas", label: "Artigas" },
+  { value: "minas", label: "Minas" },
+  { value: "san-jose", label: "San José de Mayo" },
+  { value: "durazno", label: "Durazno" },
+  { value: "florida", label: "Florida" },
+  { value: "canelones", label: "Canelones" },
+  { value: "colonia", label: "Colonia del Sacramento" },
+  { value: "punta-del-este", label: "Punta del Este" },
+  { value: "rocha", label: "Rocha" },
+  { value: "treinta-y-tres", label: "Treinta y Tres" }
+];
+
 export function Dashboard({ setCurrentView, setSelectedServiceId }) {
   const { state } = useApp();
 
@@ -23,6 +45,11 @@ export function Dashboard({ setCurrentView, setSelectedServiceId }) {
       otros: "Otros"
     };
     return labels[cat] || cat;
+  };
+
+  const getCityLabel = (cityValue) => {
+    const ciudad = CIUDADES_URUGUAY.find(c => c.value === cityValue);
+    return ciudad ? ciudad.label : cityValue;
   };
 
   const getStatusColor = (status) => {
@@ -111,7 +138,7 @@ export function Dashboard({ setCurrentView, setSelectedServiceId }) {
                   }}>
                     <div className="flex-1">
                       <h4 className="mb-1">{service.titulo}</h4>
-                      <p className="text-sm text-muted-foreground">{service.ciudad} • {getCategoryLabel(service.categoria)}</p>
+                      <p className="text-sm text-muted-foreground">{getCityLabel(service.ciudad)} • {getCategoryLabel(service.categoria)}</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge className={getStatusColor(service.estado)}>
@@ -208,7 +235,7 @@ export function Dashboard({ setCurrentView, setSelectedServiceId }) {
                     }}>
                       <div className="flex-1">
                         <h4 className="mb-1">{service.titulo}</h4>
-                        <p className="text-sm text-muted-foreground">{service.ciudad} • {getCategoryLabel(service.categoria)}</p>
+                        <p className="text-sm text-muted-foreground">{getCityLabel(service.ciudad)} • {getCategoryLabel(service.categoria)}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         {hasQuoted && <Badge variant="outline">Ya cotizado</Badge>}

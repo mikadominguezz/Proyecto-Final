@@ -7,11 +7,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
-import { ArrowLeft, MapPin, Calendar, Package, DollarSign, Clock, Star } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Package, DollarSign, Clock, Star, AlertCircle, CheckCircle } from "lucide-react";
 import { toast } from "sonner@2.0.3";
 import { CreateQuote } from "./CreateQuote.jsx";
 import { CreateSupplyOffer } from "./CreateSupplyOffer.jsx";
 import { QuoteComparator } from "./QuoteComparator.jsx";
+
+const CIUDADES_URUGUAY = [
+  { value: "montevideo", label: "Montevideo" },
+  { value: "salto", label: "Salto" },
+  { value: "paysandu", label: "Paysandú" },
+  { value: "las-piedras", label: "Las Piedras" },
+  { value: "rivera", label: "Rivera" },
+  { value: "maldonado", label: "Maldonado" },
+  { value: "tacuarembo", label: "Tacuarembó" },
+  { value: "melo", label: "Melo" },
+  { value: "mercedes", label: "Mercedes" },
+  { value: "artigas", label: "Artigas" },
+  { value: "minas", label: "Minas" },
+  { value: "san-jose", label: "San José de Mayo" },
+  { value: "durazno", label: "Durazno" },
+  { value: "florida", label: "Florida" },
+  { value: "canelones", label: "Canelones" },
+  { value: "colonia", label: "Colonia del Sacramento" },
+  { value: "punta-del-este", label: "Punta del Este" },
+  { value: "rocha", label: "Rocha" },
+  { value: "treinta-y-tres", label: "Treinta y Tres" }
+];
 
 export function ServiceDetail({ serviceId, setCurrentView }) {
   const { state, dispatch } = useApp();
@@ -47,6 +69,11 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
       otros: "Otros"
     };
     return labels[cat] || cat;
+  };
+
+  const getCityLabel = (cityValue) => {
+    const ciudad = CIUDADES_URUGUAY.find(c => c.value === cityValue);
+    return ciudad ? ciudad.label : cityValue;
   };
 
   const getStatusColor = (status) => {
@@ -156,7 +183,7 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
                   <MapPin className="w-4 h-4 text-muted-foreground" />
                   <div>
                     <div className="text-sm text-muted-foreground">Ubicación</div>
-                    <div>{service.direccion}, {service.ciudad}</div>
+                    <div>{getCityLabel(service.ciudad)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -395,23 +422,64 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
               const vendedor = state.users.find(u => u.id === offer.vendedorId);
               
               return (
-                <Card key={offer.id}>
+                <Card key={offer.id} className={offer.esPack ? "border-green-300 border-2" : ""}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h4 className="mb-1">{vendedor?.nombre}</h4>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4>{vendedor?.nombre}</h4>
+                          {offer.esPack && (
+                            <Badge className="bg-green-500">
+                              <Package className="w-3 h-3 mr-1" />
+                              Pack Especial
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-sm text-muted-foreground">{offer.items.length} insumos incluidos</p>
                       </div>
-                      <div className="text-2xl">${offer.precioTotal.toLocaleString()}</div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          ${offer.precioTotal.toLocaleString()}
+                        </div>
+                        {offer.esPack && offer.precioOriginal && (
+                          <div className="text-sm text-muted-foreground line-through">
+                            ${offer.precioOriginal.toLocaleString()}
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {offer.esPack && offer.descuentoPack > 0 && (
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="font-semibold text-green-900">
+                            Ahorro de ${(offer.precioOriginal - offer.precioTotal).toLocaleString()} ({offer.descuentoPack}% de descuento)
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="space-y-2 mb-4">
                       {offer.items.map((item, idx) => {
                         const supply = state.supplies.find(s => s.id === item.supplyId);
                         return supply ? (
-                          <div key={idx} className="flex justify-between text-sm">
-                            <span>{supply.nombre}</span>
-                            <span className="text-muted-foreground">
+                          <div key={idx} className="flex justify-between text-sm border-b pb-2">
+                            <div className="flex-1">
+                              <span className="font-medium">{supply.nombre}</span>
+                              {item.esEquivalente && (
+                                <Badge variant="outline" className="ml-2 text-xs">
+                                  <AlertCircle className="w-3 h-3 mr-1" />
+                                  Equivalente a: {item.insumoRequeridoNombre}
+                                </Badge>
+                              )}
+                              {item.notasEquivalencia && (
+                                <p className="text-xs text-muted-foreground italic mt-1">
+                                  "{item.notasEquivalencia}"
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-muted-foreground ml-4">
                               {item.cantidad} {supply.unidad}
                             </span>
                           </div>
@@ -420,7 +488,9 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
                     </div>
 
                     {offer.notas && (
-                      <p className="text-sm text-muted-foreground border-t pt-3">{offer.notas}</p>
+                      <p className="text-sm text-muted-foreground border-t pt-3">
+                        <strong>Notas:</strong> {offer.notas}
+                      </p>
                     )}
                   </CardContent>
                 </Card>

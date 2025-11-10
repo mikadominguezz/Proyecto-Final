@@ -46,6 +46,11 @@ export function ServicesList({ setCurrentView, setSelectedServiceId }) {
     return labels[cat] || cat;
   };
 
+  const getCityLabel = (cityValue) => {
+    const ciudad = CIUDADES_URUGUAY.find(c => c.value === cityValue);
+    return ciudad ? ciudad.label : cityValue;
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case "PUBLICADO": return "bg-blue-500";
@@ -179,7 +184,7 @@ export function ServicesList({ setCurrentView, setSelectedServiceId }) {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="flex items-center gap-2 text-sm">
                       <MapPin className="w-4 h-4 text-muted-foreground" />
-                      <span>{service.direccion}, {service.ciudad}</span>
+                      <span>{getCityLabel(service.ciudad)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Calendar className="w-4 h-4 text-muted-foreground" />
