@@ -89,6 +89,36 @@ function appReducer(state, action) {
         ),
       };
     
+    case "RATE_PROVIDER":
+      return {
+        ...state,
+        services: state.services.map((s) =>
+          s.id === action.payload.serviceId
+            ? { ...s, providerRating: action.payload.rating }
+            : s
+        ),
+        users: state.users.map((u) => {
+          if (u.id === action.payload.providerId) {
+            // Obtener rating actual y total de calificaciones
+            const currentRating = u.rating || 0;
+            const currentRatingCount = u.ratingCount || 0;
+            
+            // Calcular el nuevo rating como promedio ponderado
+            // (rating_actual * cantidad_actual + nueva_calificacion) / (cantidad_actual + 1)
+            const totalPoints = (currentRating * currentRatingCount) + action.payload.rating;
+            const newRatingCount = currentRatingCount + 1;
+            const newRating = totalPoints / newRatingCount;
+            
+            return { 
+              ...u, 
+              rating: Math.round(newRating * 10) / 10, // Redondear a 1 decimal
+              ratingCount: newRatingCount 
+            };
+          }
+          return u;
+        }),
+      };
+    
     default:
       return state;
   }

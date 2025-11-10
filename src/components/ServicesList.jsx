@@ -7,9 +7,31 @@ import { Input } from "./ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { MapPin, Calendar, Package, FileText } from "lucide-react";
 
+// Ciudades de Uruguay
+const CIUDADES_URUGUAY = [
+  { value: "montevideo", label: "Montevideo" },
+  { value: "salto", label: "Salto" },
+  { value: "paysandu", label: "Paysandú" },
+  { value: "las-piedras", label: "Las Piedras" },
+  { value: "rivera", label: "Rivera" },
+  { value: "maldonado", label: "Maldonado" },
+  { value: "tacuarembo", label: "Tacuarembó" },
+  { value: "melo", label: "Melo" },
+  { value: "mercedes", label: "Mercedes" },
+  { value: "artigas", label: "Artigas" },
+  { value: "minas", label: "Minas" },
+  { value: "san-jose", label: "San José de Mayo" },
+  { value: "durazno", label: "Durazno" },
+  { value: "florida", label: "Florida" },
+  { value: "canelones", label: "Canelones" },
+  { value: "colonia", label: "Colonia del Sacramento" },
+  { value: "punta-del-este", label: "Punta del Este" },
+  { value: "rocha", label: "Rocha" },
+  { value: "treinta-y-tres", label: "Treinta y Tres" }
+];
+
 export function ServicesList({ setCurrentView, setSelectedServiceId }) {
   const { state } = useApp();
-  const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterCity, setFilterCity] = useState("all");
@@ -34,16 +56,12 @@ export function ServicesList({ setCurrentView, setSelectedServiceId }) {
     }
   };
 
-  const cities = Array.from(new Set(state.services.map(s => s.ciudad)));
-
   const filteredServices = state.services.filter(service => {
-    const matchesSearch = service.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         service.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = filterCategory === "all" || service.categoria === filterCategory;
     const matchesStatus = filterStatus === "all" || service.estado === filterStatus;
     const matchesCity = filterCity === "all" || service.ciudad === filterCity;
 
-    return matchesSearch && matchesCategory && matchesStatus && matchesCity;
+    return matchesCategory && matchesStatus && matchesCity;
   });
 
   const handleServiceClick = (serviceId) => {
@@ -72,14 +90,7 @@ export function ServicesList({ setCurrentView, setSelectedServiceId }) {
           <CardDescription>Busca y filtra servicios según tus necesidades</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="md:col-span-2">
-              <Input
-                placeholder="Buscar por título o descripción..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select value={filterCategory} onValueChange={(v) => setFilterCategory(v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Categoría" />
@@ -104,22 +115,20 @@ export function ServicesList({ setCurrentView, setSelectedServiceId }) {
                 <SelectItem value="COMPLETADO">Completado</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={filterCity} onValueChange={setFilterCity}>
+              <SelectTrigger>
+                <SelectValue placeholder="Ciudad" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas las ciudades</SelectItem>
+                {CIUDADES_URUGUAY.map(ciudad => (
+                  <SelectItem key={ciudad.value} value={ciudad.value}>
+                    {ciudad.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          {cities.length > 0 && (
-            <div className="mt-4">
-              <Select value={filterCity} onValueChange={setFilterCity}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Ciudad" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todas las ciudades</SelectItem>
-                  {cities.map(city => (
-                    <SelectItem key={city} value={city}>{city}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </CardContent>
       </Card>
 

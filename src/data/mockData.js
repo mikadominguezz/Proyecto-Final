@@ -22,6 +22,7 @@ export const MOCK_USERS = [
     password: "123456",
     rol: "PROVEEDOR_SERVICIO",
     rating: 4.5,
+    ratingCount: 10, // Ya tiene 10 calificaciones previas
   },
   {
     id: "4",
@@ -30,6 +31,7 @@ export const MOCK_USERS = [
     password: "123456",
     rol: "PROVEEDOR_SERVICIO",
     rating: 4.8,
+    ratingCount: 15, // Ya tiene 15 calificaciones previas
   },
   {
     id: "5",
@@ -38,6 +40,7 @@ export const MOCK_USERS = [
     password: "123456",
     rol: "PROVEEDOR_SERVICIO",
     rating: 4.2,
+    ratingCount: 8, // Ya tiene 8 calificaciones previas
   },
   // Proveedores de Insumos
   {
@@ -63,8 +66,7 @@ export const INITIAL_SERVICES = [
     titulo: "Limpieza de jardín y pileta",
     descripcion: "Necesito limpieza completa del jardín (200m²) y mantenimiento de la pileta",
     categoria: "jardineria",
-    direccion: "Av. Libertador 1234",
-    ciudad: "Buenos Aires",
+    ciudad: "montevideo",
     fechaPreferida: "2025-11-15",
     insumosRequeridos: [
       { nombre: "Cloro", cantidad: 5, unidad: "kg" },
@@ -80,12 +82,11 @@ export const INITIAL_SERVICES = [
     titulo: "Mantenimiento de piscina",
     descripcion: "Servicio de limpieza y mantenimiento mensual de piscina de 50m²",
     categoria: "piscinas",
-    direccion: "Calle 45 #678",
-    ciudad: "Córdoba",
+    ciudad: "punta-del-este",
     fechaPreferida: "2025-11-20",
     insumosRequeridos: [
       { nombre: "Cloro", cantidad: 3, unidad: "kg" },
-      { nombre: "Algicida", cantidad: 2, unidad: "lts" },
+      { nombre: "Algicida", cantidad: 2, unidad: "l" },
     ],
     estado: "PUBLICADO",
     createdAt: new Date().toISOString(),
@@ -120,7 +121,7 @@ export const INITIAL_SUPPLIES = [
     id: "sup1",
     vendedorId: "6",
     nombre: "Cloro granulado",
-    categoria: "químicos",
+    categoria: "quimicos",
     unidad: "kg",
     precioUnit: 450,
     stock: 100,
@@ -129,7 +130,7 @@ export const INITIAL_SUPPLIES = [
     id: "sup2",
     vendedorId: "6",
     nombre: "Fertilizante orgánico",
-    categoria: "jardinería",
+    categoria: "jardineria",
     unidad: "kg",
     precioUnit: 320,
     stock: 50,
@@ -138,7 +139,7 @@ export const INITIAL_SUPPLIES = [
     id: "sup3",
     vendedorId: "7",
     nombre: "Algicida concentrado",
-    categoria: "químicos",
+    categoria: "quimicos",
     unidad: "lts",
     precioUnit: 580,
     stock: 30,

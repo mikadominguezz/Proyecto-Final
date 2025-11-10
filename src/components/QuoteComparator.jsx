@@ -68,7 +68,7 @@ export function QuoteComparator({ serviceId, onBack }) {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div className="flex-1">
-          <h2>Comparar Cotizaciones</h2>
+          <h2>{quotes.length === 1 ? "Cotización Recibida" : "Comparar Cotizaciones"}</h2>
           <p className="text-muted-foreground">{service.titulo}</p>
         </div>
       </div>
@@ -86,10 +86,30 @@ export function QuoteComparator({ serviceId, onBack }) {
         </Card>
       ) : (
         <>
+          {quotes.length === 1 && (
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-blue-900">¿Aceptar esta cotización?</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Has recibido una cotización. Puedes aceptarla directamente haciendo clic en "Seleccionar" más abajo.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Resumen</CardTitle>
-              <CardDescription>{quotes.length} cotizaciones recibidas</CardDescription>
+              <CardDescription>
+                {quotes.length === 1 
+                  ? "1 cotización recibida" 
+                  : `${quotes.length} cotizaciones recibidas`}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -173,8 +193,10 @@ export function QuoteComparator({ serviceId, onBack }) {
                           {proveedor?.rating && (
                             <div className="flex items-center gap-1 mb-3">
                               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span>{proveedor.rating}</span>
-                              <span className="text-sm text-muted-foreground ml-1">rating</span>
+                              <span className="font-medium">{proveedor.rating}</span>
+                              <span className="text-sm text-muted-foreground ml-1">
+                                ({proveedor.ratingCount || 0} {proveedor.ratingCount === 1 ? 'calificación' : 'calificaciones'})
+                              </span>
                             </div>
                           )}
                           {quote.detalle && (

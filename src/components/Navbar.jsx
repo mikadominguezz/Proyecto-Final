@@ -1,6 +1,6 @@
 import { useApp } from "../context/AppContext.jsx";
 import { Button } from "./ui/button";
-import { LogOut, User, Home, Package, FileText, ShoppingCart } from "lucide-react";
+import { LogOut, User, Home, Package, FileText, ShoppingCart, TrendingUp } from "lucide-react";
 import { Badge } from "./ui/badge";
 
 export function Navbar({ currentView, setCurrentView }) {
@@ -61,14 +61,24 @@ export function Navbar({ currentView, setCurrentView }) {
               )}
 
               {state.currentUser?.rol === "PROVEEDOR_INSUMOS" && (
-                <Button
-                  variant={currentView === "supplies" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setCurrentView("supplies")}
-                >
-                  <Package className="w-4 h-4 mr-2" />
-                  Mis Insumos
-                </Button>
+                <>
+                  <Button
+                    variant={currentView === "supply-demand" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setCurrentView("supply-demand")}
+                  >
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Demanda
+                  </Button>
+                  <Button
+                    variant={currentView === "supplies" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setCurrentView("supplies")}
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Mis Insumos
+                  </Button>
+                </>
               )}
             </div>
           </div>

@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { toast } from "sonner@2.0.3";
 import { Plus, Package, Edit, Trash2 } from "lucide-react";
@@ -13,7 +14,7 @@ export function SuppliesManagement({ setCurrentView }) {
   const { state, dispatch } = useApp();
   const [showDialog, setShowDialog] = useState(false);
   const [editingSupply, setEditingSupply] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("todas");
 
   const [nombre, setNombre] = useState("");
   const [categoria, setCategoria] = useState("");
@@ -21,12 +22,21 @@ export function SuppliesManagement({ setCurrentView }) {
   const [precioUnit, setPrecioUnit] = useState("");
   const [stock, setStock] = useState("");
 
+  const CATEGORIAS_INSUMOS = [
+    { value: "quimicos", label: "Químicos" },
+    { value: "jardineria", label: "Jardinería" },
+    { value: "piscinas", label: "Piscinas" },
+    { value: "limpieza", label: "Limpieza" },
+    { value: "herramientas", label: "Herramientas" },
+    { value: "otros", label: "Otros" }
+  ];
+
   const mySupplies = state.supplies.filter(s => s.vendedorId === state.currentUser?.id);
 
-  const filteredSupplies = mySupplies.filter(supply =>
-    supply.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    supply.categoria.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredSupplies = mySupplies.filter(supply => {
+    if (selectedCategory === "todas") return true;
+    return supply.categoria.toLowerCase() === selectedCategory.toLowerCase();
+  });
 
   const resetForm = () => {
     setNombre("");
@@ -112,6 +122,11 @@ export function SuppliesManagement({ setCurrentView }) {
     }
   };
 
+  const getCategoryLabel = (cat) => {
+    const category = CATEGORIAS_INSUMOS.find(c => c.value === cat.toLowerCase());
+    return category ? category.label : cat;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -179,14 +194,22 @@ export function SuppliesManagement({ setCurrentView }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Buscar Insumos</CardTitle>
+          <CardTitle>Filtrar por Categoría</CardTitle>
         </CardHeader>
         <CardContent>
-          <Input
-            placeholder="Buscar por nombre o categoría..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecciona una categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas las categorías</SelectItem>
+              {CATEGORIAS_INSUMOS.map(cat => (
+                <SelectItem key={cat.value} value={cat.value}>
+                  {cat.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
@@ -218,7 +241,7 @@ export function SuppliesManagement({ setCurrentView }) {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <h4 className="mb-2">{supply.nombre}</h4>
-                    <Badge variant="outline">{supply.categoria}</Badge>
+                    <Badge variant="outline">{getCategoryLabel(supply.categoria)}</Badge>
                   </div>
                 </div>
 
@@ -287,13 +310,18 @@ export function SuppliesManagement({ setCurrentView }) {
 
             <div className="space-y-2">
               <Label htmlFor="categoria">Categoría *</Label>
-              <Input
-                id="categoria"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-                placeholder="Ej: químicos, jardinería, limpieza"
-                required
-              />
+              <Select value={categoria} onValueChange={setCategoria} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona una categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIAS_INSUMOS.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

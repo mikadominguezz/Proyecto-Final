@@ -4,7 +4,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "./ui/dialog";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import { ArrowLeft, MapPin, Calendar, Package, DollarSign, Clock, Star } from "lucide-react";
+import { toast } from "sonner@2.0.3";
 import { CreateQuote } from "./CreateQuote.jsx";
 import { CreateSupplyOffer } from "./CreateSupplyOffer.jsx";
 import { QuoteComparator } from "./QuoteComparator.jsx";
@@ -14,6 +18,10 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
   const [showQuoteForm, setShowQuoteForm] = useState(false);
   const [showOfferForm, setShowOfferForm] = useState(false);
   const [showComparator, setShowComparator] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [ratingComment, setRatingComment] = useState("");
+  const [hoveredStar, setHoveredStar] = useState(0);
 
   const service = state.services.find(s => s.id === serviceId);
   const quotes = state.quotes.filter(q => q.serviceId === serviceId);
@@ -61,10 +69,45 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
   const isOwner = state.currentUser?.id === service.solicitanteId;
 
   const handleChangeStatus = (newStatus) => {
-    dispatch({
-      type: "UPDATE_SERVICE",
-      payload: { ...service, estado: newStatus }
-    });
+    if (newStatus === "COMPLETADO" && !service.providerRating) {
+      // Si se marca como completado y aún no hay rating, mostrar diálogo
+      setShowRatingDialog(true);
+    } else {
+      dispatch({
+        type: "UPDATE_SERVICE",
+        payload: { ...service, estado: newStatus }
+      });
+    }
+  };
+
+  const handleSubmitRating = () => {
+    if (rating === 0) {
+      toast.error("Por favor selecciona una calificación");
+      return;
+    }
+
+    const selectedQuote = state.quotes.find(q => q.id === service.cotizacionSeleccionadaId);
+    
+    if (selectedQuote) {
+      dispatch({
+        type: "RATE_PROVIDER",
+        payload: {
+          serviceId: service.id,
+          providerId: selectedQuote.proveedorId,
+          rating: rating
+        }
+      });
+
+      dispatch({
+        type: "UPDATE_SERVICE",
+        payload: { ...service, estado: "COMPLETADO", providerRating: rating, ratingComment }
+      });
+
+      toast.success("Servicio completado y proveedor calificado");
+      setShowRatingDialog(false);
+      setRating(0);
+      setRatingComment("");
+    }
   };
 
   if (showComparator) {
@@ -94,7 +137,7 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
         </div>
         {isOwner && quotes.length > 0 && service.estado !== "ASIGNADO" && service.estado !== "COMPLETADO" && (
           <Button onClick={() => setShowComparator(true)}>
-            Comparar Cotizaciones
+            {quotes.length === 1 ? "Ver Cotización" : "Comparar Cotizaciones"}
           </Button>
         )}
       </div>
@@ -168,6 +211,40 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
                     </Button>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {service.estado === "COMPLETADO" && service.providerRating && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Calificación del Servicio</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <div className="text-sm text-muted-foreground mb-2">Tu calificación</div>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-5 h-5 ${
+                          star <= service.providerRating
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300"
+                        }`}
+                      />
+                    ))}
+                    <span className="text-lg font-medium ml-2">
+                      {service.providerRating.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+                {service.ratingComment && (
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-2">Tu comentario</div>
+                    <p className="text-sm">{service.ratingComment}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
@@ -366,6 +443,75 @@ export function ServiceDetail({ serviceId, setCurrentView }) {
           onClose={() => setShowOfferForm(false)}
         />
       )}
+
+      <Dialog open={showRatingDialog} onOpenChange={setShowRatingDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Calificar Proveedor</DialogTitle>
+            <DialogDescription>
+              El servicio ha sido completado. Por favor califica al proveedor de servicio.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            <div className="space-y-3">
+              <Label>Calificación *</Label>
+              <div className="flex gap-2 justify-center">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setRating(star)}
+                    onMouseEnter={() => setHoveredStar(star)}
+                    onMouseLeave={() => setHoveredStar(0)}
+                    className="transition-transform hover:scale-110"
+                  >
+                    <Star
+                      className={`w-10 h-10 ${
+                        star <= (hoveredStar || rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {rating > 0 && (
+                <p className="text-center text-sm text-muted-foreground">
+                  {rating} de 5 estrellas
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="comment">Comentario (opcional)</Label>
+              <Textarea
+                id="comment"
+                value={ratingComment}
+                onChange={(e) => setRatingComment(e.target.value)}
+                placeholder="Comparte tu experiencia con este proveedor..."
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowRatingDialog(false);
+                setRating(0);
+                setRatingComment("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={handleSubmitRating}>
+              Completar y Calificar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -9,12 +9,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { toast } from "sonner@2.0.3";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
+// Opciones predefinidas
+const UNIDADES = [
+  { value: "unidad", label: "Unidad(es)" },
+  { value: "kg", label: "Kilogramos (kg)" },
+  { value: "g", label: "Gramos (g)" },
+  { value: "l", label: "Litros (l)" },
+  { value: "ml", label: "Mililitros (ml)" },
+  { value: "m", label: "Metros (m)" },
+  { value: "cm", label: "Centímetros (cm)" }
+];
+
+const CIUDADES = [
+  { value: "montevideo", label: "Montevideo" },
+  { value: "salto", label: "Salto" },
+  { value: "paysandu", label: "Paysandú" },
+  { value: "las-piedras", label: "Las Piedras" },
+  { value: "rivera", label: "Rivera" },
+  { value: "maldonado", label: "Maldonado" },
+  { value: "tacuarembo", label: "Tacuarembó" },
+  { value: "melo", label: "Melo" },
+  { value: "mercedes", label: "Mercedes" },
+  { value: "artigas", label: "Artigas" },
+  { value: "minas", label: "Minas" },
+  { value: "san-jose", label: "San José de Mayo" },
+  { value: "durazno", label: "Durazno" },
+  { value: "florida", label: "Florida" },
+  { value: "canelones", label: "Canelones" },
+  { value: "colonia", label: "Colonia del Sacramento" },
+  { value: "punta-del-este", label: "Punta del Este" },
+  { value: "rocha", label: "Rocha" },
+  { value: "treinta-y-tres", label: "Treinta y Tres" }
+];
+
 export function CreateService({ setCurrentView }) {
   const { state, dispatch } = useApp();
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [categoria, setCategoria] = useState("jardineria");
-  const [direccion, setDireccion] = useState("");
   const [ciudad, setCiudad] = useState("");
   const [fechaPreferida, setFechaPreferida] = useState("");
   const [insumosRequeridos, setInsumosRequeridos] = useState([
@@ -40,7 +72,7 @@ export function CreateService({ setCurrentView }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!titulo || !descripcion || !direccion || !ciudad || !fechaPreferida) {
+    if (!titulo || !descripcion || !ciudad || !fechaPreferida) {
       toast.error("Por favor completa todos los campos obligatorios");
       return;
     }
@@ -60,7 +92,6 @@ export function CreateService({ setCurrentView }) {
       titulo,
       descripcion,
       categoria,
-      direccion,
       ciudad,
       fechaPreferida,
       insumosRequeridos: validInsumos,
@@ -144,28 +175,20 @@ export function CreateService({ setCurrentView }) {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="direccion">Dirección *</Label>
-                <Input
-                  id="direccion"
-                  value={direccion}
-                  onChange={(e) => setDireccion(e.target.value)}
-                  placeholder="Ej: Av. Libertador 1234"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="ciudad">Ciudad *</Label>
-                <Input
-                  id="ciudad"
-                  value={ciudad}
-                  onChange={(e) => setCiudad(e.target.value)}
-                  placeholder="Ej: Buenos Aires"
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="ciudad">Ciudad *</Label>
+              <Select value={ciudad} onValueChange={(v) => setCiudad(v)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar ciudad..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {CIUDADES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>
+                      {c.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -199,11 +222,21 @@ export function CreateService({ setCurrentView }) {
                 </div>
                 <div className="w-32 space-y-2">
                   <Label>Unidad</Label>
-                  <Input
-                    value={insumo.unidad}
-                    onChange={(e) => handleInsumoChange(index, "unidad", e.target.value)}
-                    placeholder="kg, lts, unidad"
-                  />
+                  <Select 
+                    value={insumo.unidad} 
+                    onValueChange={(value) => handleInsumoChange(index, "unidad", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Unidad" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UNIDADES.map((unidad) => (
+                        <SelectItem key={unidad.value} value={unidad.value}>
+                          {unidad.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button
                   type="button"

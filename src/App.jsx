@@ -8,6 +8,7 @@ import { ServiceDetail } from "./components/ServiceDetail.jsx";
 import { CreateService } from "./components/CreateService.jsx";
 import { MyQuotes } from "./components/MyQuotes.jsx";
 import { SuppliesManagement } from "./components/SuppliesManagement.jsx";
+import { SupplyDemand } from "./components/SupplyDemand.jsx";
 import { Toaster } from "./components/ui/sonner.jsx";
 
 function AppContent() {
@@ -58,6 +59,10 @@ function AppContent() {
 
         {currentView === "supplies" && (
           <SuppliesManagement setCurrentView={setCurrentView} />
+        )}
+
+        {currentView === "supply-demand" && (
+          <SupplyDemand setCurrentView={setCurrentView} />
         )}
       </main>
 
